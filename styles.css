@@ -1,0 +1,100 @@
+:root {
+  --bg: #f2f4f7;
+  --panel: #ffffff;
+  --text: #1f2937;
+  --grid: #cfd8e3;
+  --snake: #16a34a;
+  --food: #ef4444;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, Segoe UI, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+}
+
+.app {
+  max-width: 520px;
+  margin: 24px auto;
+  padding: 16px;
+  background: var(--panel);
+  border: 1px solid #d6dde7;
+  border-radius: 8px;
+}
+
+h1 {
+  margin: 0 0 12px;
+  font-size: 1.25rem;
+}
+
+.hud {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  font-size: 0.95rem;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(16, minmax(0, 1fr));
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  border: 1px solid #b9c5d5;
+}
+
+.cell {
+  border: 1px solid var(--grid);
+  background: #fff;
+}
+
+.cell.snake {
+  background: var(--snake);
+}
+
+.cell.food {
+  background: var(--food);
+}
+
+.controls-row {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+button {
+  border: 1px solid #9aa8bc;
+  background: #fff;
+  padding: 6px 10px;
+  border-radius: 6px;
+  font: inherit;
+}
+
+.mobile-controls {
+  display: none;
+  margin-top: 12px;
+  gap: 8px;
+  flex-direction: column;
+}
+
+.mobile-middle {
+  display: flex;
+  gap: 8px;
+}
+
+.hint {
+  margin-top: 10px;
+  margin-bottom: 0;
+  font-size: 0.85rem;
+  color: #4b5563;
+}
+
+@media (pointer: coarse), (max-width: 768px) {
+  .mobile-controls {
+    display: flex;
+  }
+}
