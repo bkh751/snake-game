@@ -40,3 +40,20 @@ TODO for next agent:
 TODO for next agent:
 - Improve depth readability by tinting blocks by z-layer (currently only HUD values/bar).
 - Consider a soft boundary warning before imminent wall collision.
+
+- Perspective + guidance update:
+  - Kept world size fixed to `9x9x9` and surfaced it in UI/ready overlay.
+  - Applied perspective scaling in projection: farther z cells render smaller; near cells render larger.
+  - Localized gameplay status and controls guide to Korean with detailed command descriptions.
+- Tuned perspective intensity:
+  - Projection now uses weighted position distance (`x/y/z`) instead of only z.
+  - Increased near/far scale contrast so depth change is visually clearer.
+- Validation (perspective + Korean guide):
+  - Unit tests: `node --test snake-core.test.mjs` passed (8/8).
+  - Playwright ready check: `output/web-game-kr-ready2/state-0.json` -> `"mode":"ready"`.
+  - Playwright movement check: `output/web-game-kr-move2/state-0.json` -> `"mode":"running"`.
+  - Visual inspection: ready overlay text is Korean and perspective scaling is active (distance-based projection).
+  - No `errors-*.json` found.
+
+TODO for next agent:
+- Playwright client key map currently favors arrow-style labels; add explicit `Q/E` aliases in client script if automated z-axis control coverage is required.

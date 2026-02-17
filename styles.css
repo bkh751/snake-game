@@ -35,6 +35,8 @@ h1 {
 .hud {
   display: flex;
   justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
   margin-bottom: 8px;
   font-size: 0.96rem;
 }
@@ -105,6 +107,28 @@ button {
   margin-bottom: 0;
   font-size: 0.9rem;
   color: #2f4053;
+}
+
+.guide {
+  margin-top: 12px;
+  padding: 10px 12px;
+  border: 1px solid #bfd2e1;
+  border-radius: 8px;
+  background: #f6fbff;
+}
+
+.guide h2 {
+  margin: 0 0 6px;
+  font-size: 0.98rem;
+}
+
+.guide ul {
+  margin: 0;
+  padding-left: 18px;
+  display: grid;
+  gap: 3px;
+  font-size: 0.86rem;
+  color: #20354d;
 }
 
 @media (pointer: coarse), (max-width: 768px) {

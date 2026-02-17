@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="ko">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -10,34 +10,45 @@
     <main class="app">
       <h1>Snake 3D</h1>
       <div class="hud">
-        <span>Score: <strong id="score">0</strong></span>
-        <span id="status">Ready</span>
+        <span>점수: <strong id="score">0</strong></span>
+        <span>공간: <strong>9x9x9</strong></span>
+        <span id="status">대기 중</span>
       </div>
       <div class="depth-hud">
-        <span>Head Z: <strong id="head-depth">0/8</strong></span>
-        <span>Food Z: <strong id="food-depth">0/8</strong></span>
+        <span>머리 Z: <strong id="head-depth">0/8</strong></span>
+        <span>먹이 Z: <strong id="food-depth">0/8</strong></span>
         <div class="depth-track" aria-hidden="true">
           <div id="depth-fill" class="depth-fill"></div>
         </div>
       </div>
       <canvas id="game-canvas" aria-label="3d snake board"></canvas>
       <div class="controls-row">
-        <button id="pause-btn" type="button">Pause</button>
-        <button id="restart-btn" type="button">Restart</button>
+        <button id="pause-btn" type="button">일시정지</button>
+        <button id="restart-btn" type="button">재시작</button>
       </div>
       <div class="mobile-controls" aria-label="touch controls">
-        <button data-dir="up" type="button">Up</button>
+        <button data-dir="up" type="button">위</button>
         <div class="mobile-middle">
-          <button data-dir="left" type="button">Left</button>
-          <button data-dir="down" type="button">Down</button>
-          <button data-dir="right" type="button">Right</button>
+          <button data-dir="left" type="button">왼쪽</button>
+          <button data-dir="down" type="button">아래</button>
+          <button data-dir="right" type="button">오른쪽</button>
         </div>
         <div class="mobile-middle">
-          <button data-dir="in" type="button">In (Q)</button>
-          <button data-dir="out" type="button">Out (E)</button>
+          <button data-dir="in" type="button">안쪽(Q)</button>
+          <button data-dir="out" type="button">바깥(E)</button>
         </div>
       </div>
-      <p class="hint">Start: first move key. Arrow/WASD: XY, Q/E: Z, P: pause, R: restart, F: fullscreen.</p>
+      <section class="guide" aria-label="조작 설명">
+        <h2>조작 설명</h2>
+        <ul>
+          <li>시작: 방향키, WASD, Q, E 중 하나를 누르면 게임이 시작됩니다.</li>
+          <li>좌우/상하 이동: 방향키 또는 WASD</li>
+          <li>깊이 이동: Q는 화면 안쪽(+Z), E는 화면 바깥쪽(-Z)</li>
+          <li>일시정지/재개: P</li>
+          <li>재시작: R 또는 재시작 버튼</li>
+          <li>전체화면 전환: F (Esc로 해제)</li>
+        </ul>
+      </section>
     </main>
     <script type="module" src="./main.mjs"></script>
   </body>

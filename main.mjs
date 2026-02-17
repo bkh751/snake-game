@@ -37,24 +37,33 @@ function resizeCanvas() {
 function project(pos) {
   const unit = Math.min(canvas.clientWidth, canvas.clientHeight) / (WORLD_SIZE * 2.2);
   const centerX = canvas.clientWidth * 0.5;
-  const baseY = canvas.clientHeight * 0.18;
+  const horizonY = canvas.clientHeight * 0.14;
+  const maxDistance = (WORLD_SIZE - 1) * (1.2 + 0.7 + 0.4);
+  const weightedDistance = pos.z * 1.2 + pos.y * 0.7 + pos.x * 0.4;
+  const distanceRatio = Math.max(0, Math.min(1, weightedDistance / Math.max(1, maxDistance)));
+  const perspective = 1.24 - distanceRatio * 0.66;
+  const isoX = (pos.x - pos.z) * unit;
+  const isoY = (pos.x + pos.z) * unit * 0.56 + pos.y * unit * 0.9;
+
   return {
-    x: centerX + (pos.x - pos.z) * unit,
-    y: baseY + (pos.x + pos.z) * unit * 0.56 + pos.y * unit * 0.9,
+    x: centerX + isoX * perspective,
+    y: horizonY + isoY * perspective + distanceRatio * unit * 1.2,
     unit,
+    perspective,
+    distanceRatio,
   };
 }
 
 function drawCell(pos, fill, stroke = 'rgba(0, 0, 0, 0.28)') {
   const p = project(pos);
-  const size = Math.max(6, p.unit * 0.82);
-  const depthLift = (WORLD_SIZE - 1 - pos.z) * 0.22;
+  const size = Math.max(4.2, p.unit * 0.92 * p.perspective);
+  const nearLift = (1 - p.distanceRatio) * size * 0.32;
 
   ctx.fillStyle = fill;
   ctx.strokeStyle = stroke;
   ctx.lineWidth = 1;
   ctx.beginPath();
-  ctx.rect(p.x - size * 0.5, p.y - size * (0.72 + depthLift * 0.08), size, size);
+  ctx.rect(p.x - size * 0.5, p.y - size * 0.72 - nearLift, size, size);
   ctx.fill();
   ctx.stroke();
 }
@@ -114,8 +123,8 @@ function drawWorldGuides() {
 function drawReadyOverlay() {
   if (hasStarted || state.gameOver) return;
 
-  const panelWidth = Math.min(canvas.clientWidth * 0.72, 420);
-  const panelHeight = 86;
+  const panelWidth = Math.min(canvas.clientWidth * 0.8, 470);
+  const panelHeight = 102;
   const x = (canvas.clientWidth - panelWidth) * 0.5;
   const y = canvas.clientHeight * 0.06;
 
@@ -127,9 +136,10 @@ function drawReadyOverlay() {
   ctx.fillStyle = '#0e2f4f';
   ctx.font = '600 20px Trebuchet MS';
   ctx.textAlign = 'center';
-  ctx.fillText('Ready to Launch', x + panelWidth * 0.5, y + 32);
+  ctx.fillText('시작 준비 완료', x + panelWidth * 0.5, y + 34);
   ctx.font = '14px Trebuchet MS';
-  ctx.fillText('Press any move key (Arrow/WASD/Q/E) to start', x + panelWidth * 0.5, y + 58);
+  ctx.fillText('방향키/WASD/Q/E 중 하나를 누르면 시작됩니다', x + panelWidth * 0.5, y + 62);
+  ctx.fillText('공간 크기: 9 x 9 x 9', x + panelWidth * 0.5, y + 84);
 }
 
 function updateDepthHud() {
@@ -154,17 +164,17 @@ function syncHud() {
   updateDepthHud();
 
   if (state.gameOver) {
-    statusEl.textContent = 'Game Over';
-    pauseBtn.textContent = 'Pause';
+    statusEl.textContent = '게임 오버';
+    pauseBtn.textContent = '일시정지';
   } else if (!hasStarted) {
-    statusEl.textContent = 'Ready';
-    pauseBtn.textContent = 'Pause';
+    statusEl.textContent = '대기 중';
+    pauseBtn.textContent = '일시정지';
   } else if (state.paused) {
-    statusEl.textContent = 'Paused';
-    pauseBtn.textContent = 'Resume';
+    statusEl.textContent = '일시정지';
+    pauseBtn.textContent = '재개';
   } else {
-    statusEl.textContent = 'Running';
-    pauseBtn.textContent = 'Pause';
+    statusEl.textContent = '진행 중';
+    pauseBtn.textContent = '일시정지';
   }
 }
 
