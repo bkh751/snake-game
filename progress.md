@@ -57,3 +57,13 @@ TODO for next agent:
 
 TODO for next agent:
 - Playwright client key map currently favors arrow-style labels; add explicit `Q/E` aliases in client script if automated z-axis control coverage is required.
+- Cube render upgrade:
+  - Replaced heuristic projection with camera-based 3D projection (yaw/pitch/perspective).
+  - Updated world guide rendering to draw sorted cube faces + edges for a stable cube silhouette.
+  - Updated snake/food block drawing with distance-scaled size, shadow, and depth-aware color tone.
+  - Added game-over overlay panel for clearer restart guidance.
+- Validation (cube render polish):
+  - Unit tests: `node --test snake-core.test.mjs` passed (8/8).
+  - Playwright ready capture: `output/web-game-cube-ready/state-0.json` (`"mode":"ready"`).
+  - Visual check: cube silhouette is now stable with face shading and perspective-scaled block size.
+  - Playwright run captures showed frequent early `game_over` under scripted input timing, but rendering/controls/hud worked and no console error logs were produced.

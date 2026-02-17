@@ -7,6 +7,10 @@ import {
 } from './snake-core.mjs';
 
 const WORLD_SIZE = 9;
+const CAMERA_YAW = -Math.PI / 4;
+const CAMERA_PITCH = Math.PI / 6;
+const CAMERA_DISTANCE = WORLD_SIZE * 2.9;
+const CAMERA_FOCAL = WORLD_SIZE * 2.4;
 const canvas = document.getElementById('game-canvas');
 const ctx = canvas.getContext('2d');
 const scoreEl = document.getElementById('score');
@@ -34,36 +38,66 @@ function resizeCanvas() {
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 }
 
+function toViewSpace(pos) {
+  const half = (WORLD_SIZE - 1) / 2;
+  const x = pos.x - half;
+  const y = half - pos.y;
+  const z = pos.z - half;
+
+  const yawCos = Math.cos(CAMERA_YAW);
+  const yawSin = Math.sin(CAMERA_YAW);
+  const pitchCos = Math.cos(CAMERA_PITCH);
+  const pitchSin = Math.sin(CAMERA_PITCH);
+
+  const x1 = x * yawCos - z * yawSin;
+  const z1 = x * yawSin + z * yawCos;
+  const y2 = y * pitchCos - z1 * pitchSin;
+  const z2 = y * pitchSin + z1 * pitchCos;
+
+  return { x: x1, y: y2, z: z2 };
+}
+
 function project(pos) {
-  const unit = Math.min(canvas.clientWidth, canvas.clientHeight) / (WORLD_SIZE * 2.2);
+  const unit = Math.min(canvas.clientWidth, canvas.clientHeight) / 13;
   const centerX = canvas.clientWidth * 0.5;
-  const horizonY = canvas.clientHeight * 0.14;
-  const maxDistance = (WORLD_SIZE - 1) * (1.2 + 0.7 + 0.4);
-  const weightedDistance = pos.z * 1.2 + pos.y * 0.7 + pos.x * 0.4;
-  const distanceRatio = Math.max(0, Math.min(1, weightedDistance / Math.max(1, maxDistance)));
-  const perspective = 1.24 - distanceRatio * 0.66;
-  const isoX = (pos.x - pos.z) * unit;
-  const isoY = (pos.x + pos.z) * unit * 0.56 + pos.y * unit * 0.9;
+  const centerY = canvas.clientHeight * 0.56;
+  const view = toViewSpace(pos);
+  const depth = CAMERA_DISTANCE - view.z;
+  const safeDepth = Math.max(0.6, depth);
+  const scale = CAMERA_FOCAL / safeDepth;
 
   return {
-    x: centerX + isoX * perspective,
-    y: horizonY + isoY * perspective + distanceRatio * unit * 1.2,
+    x: centerX + view.x * unit * scale,
+    y: centerY - view.y * unit * scale,
     unit,
-    perspective,
-    distanceRatio,
+    scale,
+    depth: safeDepth,
+    viewZ: view.z,
   };
 }
 
-function drawCell(pos, fill, stroke = 'rgba(0, 0, 0, 0.28)') {
-  const p = project(pos);
-  const size = Math.max(4.2, p.unit * 0.92 * p.perspective);
-  const nearLift = (1 - p.distanceRatio) * size * 0.32;
+function drawCell(projected, fill, stroke = 'rgba(0, 0, 0, 0.3)') {
+  const size = Math.max(4.6, projected.unit * 0.62 * projected.scale);
+  const shadowAlpha = Math.max(0.06, Math.min(0.2, projected.scale * 0.2));
+
+  ctx.fillStyle = `rgba(18, 33, 46, ${shadowAlpha})`;
+  ctx.beginPath();
+  ctx.ellipse(
+    projected.x,
+    projected.y + size * 0.25,
+    size * 0.48,
+    size * 0.22,
+    0,
+    0,
+    Math.PI * 2
+  );
+  ctx.fill();
 
   ctx.fillStyle = fill;
   ctx.strokeStyle = stroke;
   ctx.lineWidth = 1;
   ctx.beginPath();
-  ctx.rect(p.x - size * 0.5, p.y - size * 0.72 - nearLift, size, size);
+  ctx.rect(projected.x - size * 0.5, projected.y - size * 0.82, size, size);
   ctx.fill();
   ctx.stroke();
 }
@@ -94,30 +128,60 @@ function drawWorldGuides() {
     { x: 0, y: WORLD_SIZE - 1, z: WORLD_SIZE - 1 },
   ];
 
-  ctx.strokeStyle = 'rgba(39, 64, 87, 0.32)';
-  ctx.lineWidth = 1.2;
+  const projected = corners.map((corner) => project(corner));
+  const faces = [
+    { ids: [0, 1, 2, 3], fill: 'rgba(138, 178, 206, 0.08)' },
+    { ids: [4, 5, 6, 7], fill: 'rgba(73, 120, 154, 0.12)' },
+    { ids: [0, 3, 7, 4], fill: 'rgba(90, 146, 178, 0.08)' },
+    { ids: [1, 2, 6, 5], fill: 'rgba(74, 131, 167, 0.11)' },
+    { ids: [0, 1, 5, 4], fill: 'rgba(170, 206, 227, 0.09)' },
+    { ids: [3, 2, 6, 7], fill: 'rgba(73, 109, 138, 0.08)' },
+  ];
 
-  function line(a, b) {
-    const pa = project(corners[a]);
-    const pb = project(corners[b]);
+  faces.sort((a, b) => {
+    const az = a.ids.reduce((sum, id) => sum + projected[id].viewZ, 0) / a.ids.length;
+    const bz = b.ids.reduce((sum, id) => sum + projected[id].viewZ, 0) / b.ids.length;
+    return az - bz;
+  });
+
+  for (const face of faces) {
+    const p0 = projected[face.ids[0]];
+    ctx.fillStyle = face.fill;
+    ctx.beginPath();
+    ctx.moveTo(p0.x, p0.y);
+    for (let i = 1; i < face.ids.length; i += 1) {
+      const p = projected[face.ids[i]];
+      ctx.lineTo(p.x, p.y);
+    }
+    ctx.closePath();
+    ctx.fill();
+  }
+
+  ctx.strokeStyle = 'rgba(42, 68, 91, 0.45)';
+  ctx.lineWidth = 1.35;
+  const edges = [
+    [0, 1],
+    [1, 2],
+    [2, 3],
+    [3, 0],
+    [4, 5],
+    [5, 6],
+    [6, 7],
+    [7, 4],
+    [0, 4],
+    [1, 5],
+    [2, 6],
+    [3, 7],
+  ];
+
+  for (const [a, b] of edges) {
+    const pa = projected[a];
+    const pb = projected[b];
     ctx.beginPath();
     ctx.moveTo(pa.x, pa.y);
     ctx.lineTo(pb.x, pb.y);
     ctx.stroke();
   }
-
-  line(0, 1);
-  line(1, 2);
-  line(2, 3);
-  line(3, 0);
-  line(4, 5);
-  line(5, 6);
-  line(6, 7);
-  line(7, 4);
-  line(0, 4);
-  line(1, 5);
-  line(2, 6);
-  line(3, 7);
 }
 
 function drawReadyOverlay() {
@@ -140,6 +204,27 @@ function drawReadyOverlay() {
   ctx.font = '14px Trebuchet MS';
   ctx.fillText('방향키/WASD/Q/E 중 하나를 누르면 시작됩니다', x + panelWidth * 0.5, y + 62);
   ctx.fillText('공간 크기: 9 x 9 x 9', x + panelWidth * 0.5, y + 84);
+}
+
+function drawGameOverOverlay() {
+  if (!state.gameOver) return;
+
+  const panelWidth = Math.min(canvas.clientWidth * 0.65, 400);
+  const panelHeight = 88;
+  const x = (canvas.clientWidth - panelWidth) * 0.5;
+  const y = canvas.clientHeight * 0.72;
+
+  ctx.fillStyle = 'rgba(255, 247, 247, 0.9)';
+  ctx.fillRect(x, y, panelWidth, panelHeight);
+  ctx.strokeStyle = 'rgba(130, 42, 42, 0.45)';
+  ctx.strokeRect(x, y, panelWidth, panelHeight);
+
+  ctx.fillStyle = '#6f1d1d';
+  ctx.textAlign = 'center';
+  ctx.font = '700 18px Trebuchet MS';
+  ctx.fillText('게임 오버', x + panelWidth * 0.5, y + 30);
+  ctx.font = '14px Trebuchet MS';
+  ctx.fillText('R 키 또는 재시작 버튼으로 다시 시작하세요', x + panelWidth * 0.5, y + 56);
 }
 
 function updateDepthHud() {
@@ -191,23 +276,25 @@ function draw() {
     drawable.push({ kind: 'food', pos: state.food });
   }
 
-  drawable.sort((a, b) => {
-    const da = a.pos.x + a.pos.y + a.pos.z;
-    const db = b.pos.x + b.pos.y + b.pos.z;
-    return da - db;
-  });
+  const drawableProjected = drawable
+    .map((item) => ({ ...item, projected: project(item.pos) }))
+    .sort((a, b) => b.projected.depth - a.projected.depth);
 
-  for (const item of drawable) {
+  for (const item of drawableProjected) {
+    const depthTone = item.pos.z / Math.max(1, WORLD_SIZE - 1);
     if (item.kind === 'food') {
-      drawCell(item.pos, '#ff6b6b', '#972222');
+      drawCell(item.projected, '#ff6b6b', '#972222');
     } else if (item.kind === 'head') {
-      drawCell(item.pos, '#22c55e', '#0b5929');
+      const g = Math.round(205 - depthTone * 55);
+      drawCell(item.projected, `rgb(42, ${g}, 103)`, '#0b5929');
     } else {
-      drawCell(item.pos, '#16a34a');
+      const g = Math.round(178 - depthTone * 52);
+      drawCell(item.projected, `rgb(22, ${g}, 74)`);
     }
   }
 
   drawReadyOverlay();
+  drawGameOverOverlay();
   syncHud();
 }
 
