@@ -1,10 +1,8 @@
 :root {
-  --bg: #f2f4f7;
+  --bg-top: #d9efff;
+  --bg-bottom: #ffeab3;
   --panel: #ffffff;
-  --text: #1f2937;
-  --grid: #cfd8e3;
-  --snake: #16a34a;
-  --food: #ef4444;
+  --text: #162131;
 }
 
 * {
@@ -13,51 +11,41 @@
 
 body {
   margin: 0;
-  font-family: system-ui, -apple-system, Segoe UI, sans-serif;
-  background: var(--bg);
+  font-family: "Trebuchet MS", "Avenir Next", sans-serif;
+  background: linear-gradient(180deg, var(--bg-top), var(--bg-bottom));
   color: var(--text);
+  min-height: 100vh;
 }
 
 .app {
-  max-width: 520px;
-  margin: 24px auto;
-  padding: 16px;
+  width: min(880px, 100% - 24px);
+  margin: 16px auto;
+  padding: 14px;
   background: var(--panel);
-  border: 1px solid #d6dde7;
-  border-radius: 8px;
+  border: 1px solid #aac6d9;
+  border-radius: 12px;
+  box-shadow: 0 6px 22px rgba(16, 36, 58, 0.15);
 }
 
 h1 {
-  margin: 0 0 12px;
-  font-size: 1.25rem;
+  margin: 0 0 10px;
+  font-size: 1.35rem;
 }
 
 .hud {
   display: flex;
   justify-content: space-between;
   margin-bottom: 10px;
-  font-size: 0.95rem;
+  font-size: 0.96rem;
 }
 
-.grid {
-  display: grid;
-  grid-template-columns: repeat(16, minmax(0, 1fr));
+#game-canvas {
+  display: block;
   width: 100%;
-  aspect-ratio: 1 / 1;
-  border: 1px solid #b9c5d5;
-}
-
-.cell {
-  border: 1px solid var(--grid);
-  background: #fff;
-}
-
-.cell.snake {
-  background: var(--snake);
-}
-
-.cell.food {
-  background: var(--food);
+  max-width: 760px;
+  border: 1px solid #8aa9bf;
+  border-radius: 10px;
+  margin: 0 auto;
 }
 
 .controls-row {
@@ -67,11 +55,12 @@ h1 {
 }
 
 button {
-  border: 1px solid #9aa8bc;
+  border: 1px solid #8ca2b8;
   background: #fff;
-  padding: 6px 10px;
-  border-radius: 6px;
+  padding: 7px 11px;
+  border-radius: 7px;
   font: inherit;
+  cursor: pointer;
 }
 
 .mobile-controls {
@@ -89,8 +78,8 @@ button {
 .hint {
   margin-top: 10px;
   margin-bottom: 0;
-  font-size: 0.85rem;
-  color: #4b5563;
+  font-size: 0.9rem;
+  color: #2f4053;
 }
 
 @media (pointer: coarse), (max-width: 768px) {

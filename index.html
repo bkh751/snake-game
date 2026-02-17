@@ -3,17 +3,17 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Snake</title>
+    <title>Snake 3D</title>
     <link rel="stylesheet" href="./styles.css" />
   </head>
   <body>
     <main class="app">
-      <h1>Snake</h1>
+      <h1>Snake 3D</h1>
       <div class="hud">
         <span>Score: <strong id="score">0</strong></span>
         <span id="status">Running</span>
       </div>
-      <div id="grid" class="grid" aria-label="snake board"></div>
+      <canvas id="game-canvas" aria-label="3d snake board"></canvas>
       <div class="controls-row">
         <button id="pause-btn" type="button">Pause</button>
         <button id="restart-btn" type="button">Restart</button>
@@ -25,8 +25,12 @@
           <button data-dir="down" type="button">Down</button>
           <button data-dir="right" type="button">Right</button>
         </div>
+        <div class="mobile-middle">
+          <button data-dir="in" type="button">In (Q)</button>
+          <button data-dir="out" type="button">Out (E)</button>
+        </div>
       </div>
-      <p class="hint">Arrow keys/WASD to move. P: pause. R: restart.</p>
+      <p class="hint">Arrow/WASD: move XY, Q/E: move Z, P: pause, R: restart.</p>
     </main>
     <script type="module" src="./main.mjs"></script>
   </body>
