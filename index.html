@@ -11,7 +11,14 @@
       <h1>Snake 3D</h1>
       <div class="hud">
         <span>Score: <strong id="score">0</strong></span>
-        <span id="status">Running</span>
+        <span id="status">Ready</span>
+      </div>
+      <div class="depth-hud">
+        <span>Head Z: <strong id="head-depth">0/8</strong></span>
+        <span>Food Z: <strong id="food-depth">0/8</strong></span>
+        <div class="depth-track" aria-hidden="true">
+          <div id="depth-fill" class="depth-fill"></div>
+        </div>
       </div>
       <canvas id="game-canvas" aria-label="3d snake board"></canvas>
       <div class="controls-row">
@@ -30,7 +37,7 @@
           <button data-dir="out" type="button">Out (E)</button>
         </div>
       </div>
-      <p class="hint">Arrow/WASD: move XY, Q/E: move Z, P: pause, R: restart.</p>
+      <p class="hint">Start: first move key. Arrow/WASD: XY, Q/E: Z, P: pause, R: restart, F: fullscreen.</p>
     </main>
     <script type="module" src="./main.mjs"></script>
   </body>

@@ -35,8 +35,33 @@ h1 {
 .hud {
   display: flex;
   justify-content: space-between;
-  margin-bottom: 10px;
+  margin-bottom: 8px;
   font-size: 0.96rem;
+}
+
+.depth-hud {
+  display: grid;
+  grid-template-columns: auto auto minmax(120px, 1fr);
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+  font-size: 0.85rem;
+  color: #1f344a;
+}
+
+.depth-track {
+  height: 8px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #9ee9ff, #7cd5b2, #57af7d);
+  border: 1px solid #86a9be;
+  overflow: hidden;
+}
+
+.depth-fill {
+  width: 0%;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.75);
+  transition: width 0.15s linear;
 }
 
 #game-canvas {
@@ -85,5 +110,9 @@ button {
 @media (pointer: coarse), (max-width: 768px) {
   .mobile-controls {
     display: flex;
+  }
+
+  .depth-hud {
+    grid-template-columns: 1fr;
   }
 }

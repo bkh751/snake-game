@@ -23,3 +23,20 @@ Original prompt: 3D Snake 게임으로 발전시켜서 커밋해줘
 TODO for next agent:
 - Consider adding onboarding/start state so first move choice is explicit before ticking.
 - Add depth indicator UI (current z-layer of head/food) for easier human play.
+
+- Follow-up improvements completed:
+  - Added explicit `ready` start state: game does not tick until first direction input.
+  - Added depth HUD (`Head Z`, `Food Z`, and depth progress bar).
+  - Added fullscreen toggle on `F` and resize handling on fullscreen change.
+  - Extended `render_game_to_text` with `mode: ready` and depth fields.
+- Validation (follow-up):
+  - Unit tests: `node --test snake-core.test.mjs` passed (8/8).
+  - Playwright checks:
+    - Ready scenario output: `output/web-game-ready/state-0.json` with `"mode":"ready"`.
+    - Movement scenario output: `output/web-game-move-safe2/state-0.json` with `"mode":"running"`.
+  - Screenshot inspection confirms ready overlay and in-game movement rendering.
+  - No `errors-*.json` produced (no console/page errors captured).
+
+TODO for next agent:
+- Improve depth readability by tinting blocks by z-layer (currently only HUD values/bar).
+- Consider a soft boundary warning before imminent wall collision.

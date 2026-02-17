@@ -11,12 +11,16 @@ const canvas = document.getElementById('game-canvas');
 const ctx = canvas.getContext('2d');
 const scoreEl = document.getElementById('score');
 const statusEl = document.getElementById('status');
+const headDepthEl = document.getElementById('head-depth');
+const foodDepthEl = document.getElementById('food-depth');
+const depthFillEl = document.getElementById('depth-fill');
 const restartBtn = document.getElementById('restart-btn');
 const pauseBtn = document.getElementById('pause-btn');
 const touchButtons = document.querySelectorAll('.mobile-controls button[data-dir]');
 
 const state = createInitialState({ width: WORLD_SIZE, height: WORLD_SIZE, depth: WORLD_SIZE });
 
+let hasStarted = false;
 let lastTimestamp = performance.now();
 
 function resizeCanvas() {
@@ -107,6 +111,63 @@ function drawWorldGuides() {
   line(3, 7);
 }
 
+function drawReadyOverlay() {
+  if (hasStarted || state.gameOver) return;
+
+  const panelWidth = Math.min(canvas.clientWidth * 0.72, 420);
+  const panelHeight = 86;
+  const x = (canvas.clientWidth - panelWidth) * 0.5;
+  const y = canvas.clientHeight * 0.06;
+
+  ctx.fillStyle = 'rgba(255, 255, 255, 0.88)';
+  ctx.fillRect(x, y, panelWidth, panelHeight);
+  ctx.strokeStyle = 'rgba(32, 64, 94, 0.45)';
+  ctx.strokeRect(x, y, panelWidth, panelHeight);
+
+  ctx.fillStyle = '#0e2f4f';
+  ctx.font = '600 20px Trebuchet MS';
+  ctx.textAlign = 'center';
+  ctx.fillText('Ready to Launch', x + panelWidth * 0.5, y + 32);
+  ctx.font = '14px Trebuchet MS';
+  ctx.fillText('Press any move key (Arrow/WASD/Q/E) to start', x + panelWidth * 0.5, y + 58);
+}
+
+function updateDepthHud() {
+  const maxDepth = Math.max(1, state.depth - 1);
+  const head = state.snake[0];
+
+  if (head) {
+    headDepthEl.textContent = `${head.z}/${state.depth - 1}`;
+    const ratio = Math.max(0, Math.min(1, head.z / maxDepth));
+    depthFillEl.style.width = `${Math.round(ratio * 100)}%`;
+  }
+
+  if (state.food) {
+    foodDepthEl.textContent = `${state.food.z}/${state.depth - 1}`;
+  } else {
+    foodDepthEl.textContent = '-';
+  }
+}
+
+function syncHud() {
+  scoreEl.textContent = String(state.score);
+  updateDepthHud();
+
+  if (state.gameOver) {
+    statusEl.textContent = 'Game Over';
+    pauseBtn.textContent = 'Pause';
+  } else if (!hasStarted) {
+    statusEl.textContent = 'Ready';
+    pauseBtn.textContent = 'Pause';
+  } else if (state.paused) {
+    statusEl.textContent = 'Paused';
+    pauseBtn.textContent = 'Resume';
+  } else {
+    statusEl.textContent = 'Running';
+    pauseBtn.textContent = 'Pause';
+  }
+}
+
 function draw() {
   drawBackground();
   drawWorldGuides();
@@ -136,21 +197,12 @@ function draw() {
     }
   }
 
-  scoreEl.textContent = String(state.score);
-
-  if (state.gameOver) {
-    statusEl.textContent = 'Game Over';
-    pauseBtn.textContent = 'Pause';
-  } else if (state.paused) {
-    statusEl.textContent = 'Paused';
-    pauseBtn.textContent = 'Resume';
-  } else {
-    statusEl.textContent = 'Running';
-    pauseBtn.textContent = 'Pause';
-  }
+  drawReadyOverlay();
+  syncHud();
 }
 
 function update(elapsedMs) {
+  if (!hasStarted) return;
   updateByTime(state, elapsedMs);
 }
 
@@ -172,42 +224,80 @@ function directionForKey(key) {
   return null;
 }
 
+function handleDirectionInput(dir) {
+  setDirection(state, dir);
+  if (!hasStarted && !state.gameOver) {
+    hasStarted = true;
+    state.paused = false;
+  }
+}
+
+async function toggleFullscreenMode() {
+  try {
+    if (!document.fullscreenElement) {
+      await document.documentElement.requestFullscreen();
+    } else {
+      await document.exitFullscreen();
+    }
+  } catch {
+    // Ignore fullscreen errors caused by platform restrictions.
+  }
+}
+
 document.addEventListener('keydown', (event) => {
   const dir = directionForKey(event.key);
   if (dir) {
-    setDirection(state, dir);
+    event.preventDefault();
+    handleDirectionInput(dir);
     return;
   }
 
   if (event.key === 'p' || event.key === 'P') {
-    togglePause(state);
+    if (hasStarted && !state.gameOver) togglePause(state);
   } else if (event.key === 'r' || event.key === 'R') {
     restartState(state);
+    hasStarted = false;
+  } else if (event.key === 'f' || event.key === 'F') {
+    toggleFullscreenMode();
   }
 });
 
-restartBtn.addEventListener('click', () => restartState(state));
-pauseBtn.addEventListener('click', () => togglePause(state));
+restartBtn.addEventListener('click', () => {
+  restartState(state);
+  hasStarted = false;
+});
+pauseBtn.addEventListener('click', () => {
+  if (hasStarted && !state.gameOver) togglePause(state);
+});
 
 for (const button of touchButtons) {
   button.addEventListener('click', () => {
     const dir = button.getAttribute('data-dir');
-    setDirection(state, dir);
+    handleDirectionInput(dir);
   });
 }
 
-window.addEventListener('resize', resizeCanvas);
+window.addEventListener('resize', () => {
+  resizeCanvas();
+  draw();
+});
+window.addEventListener('fullscreenchange', () => {
+  resizeCanvas();
+  draw();
+});
 
 window.render_game_to_text = () => {
   return JSON.stringify({
     coordinateSystem: 'origin at top-left-near corner; +x right, +y down, +z deeper into screen',
-    mode: state.gameOver ? 'game_over' : state.paused ? 'paused' : 'running',
+    mode: state.gameOver ? 'game_over' : !hasStarted ? 'ready' : state.paused ? 'paused' : 'running',
     world: { width: state.width, height: state.height, depth: state.depth },
     snake: state.snake,
     food: state.food,
     score: state.score,
     direction: state.direction,
     nextDirection: state.nextDirection,
+    headDepth: state.snake[0]?.z ?? null,
+    foodDepth: state.food?.z ?? null,
   });
 };
 
