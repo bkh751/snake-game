@@ -102,6 +102,74 @@ function drawCell(projected, fill, stroke = 'rgba(0, 0, 0, 0.3)') {
   ctx.stroke();
 }
 
+function drawGroundShadow(pos, kind) {
+  const floorPos = { x: pos.x, y: WORLD_SIZE - 1, z: pos.z };
+  const ground = project(floorPos);
+  const altitude = WORLD_SIZE - 1 - pos.y;
+  const spread = 1 + altitude * 0.13;
+  const baseSize = Math.max(6, ground.unit * 0.36 * ground.scale * spread);
+
+  let alpha = 0.22 - altitude * 0.022;
+  if (kind === 'food') alpha *= 0.8;
+  if (kind === 'head') alpha *= 1.15;
+  alpha = Math.max(0.03, Math.min(0.28, alpha));
+
+  ctx.fillStyle = `rgba(17, 32, 44, ${alpha})`;
+  ctx.beginPath();
+  ctx.ellipse(
+    ground.x,
+    ground.y + baseSize * 0.08,
+    baseSize * 0.68,
+    baseSize * 0.27,
+    0,
+    0,
+    Math.PI * 2
+  );
+  ctx.fill();
+}
+
+function drawTargetGuide(headPos, foodPos) {
+  if (!headPos || !foodPos) return;
+
+  const head = project(headPos);
+  const food = project(foodPos);
+  const foodFloor = project({ x: foodPos.x, y: WORLD_SIZE - 1, z: foodPos.z });
+  const beamWidth = Math.max(1.2, 2.1 * Math.min(head.scale, food.scale));
+
+  ctx.save();
+
+  ctx.strokeStyle = 'rgba(88, 255, 142, 0.75)';
+  ctx.lineWidth = beamWidth;
+  ctx.shadowColor = 'rgba(67, 232, 123, 0.65)';
+  ctx.shadowBlur = 8;
+  ctx.setLineDash([6, 4]);
+  ctx.beginPath();
+  ctx.moveTo(head.x, head.y - 3);
+  ctx.lineTo(food.x, food.y - 3);
+  ctx.stroke();
+
+  ctx.setLineDash([3, 5]);
+  ctx.strokeStyle = 'rgba(67, 232, 123, 0.45)';
+  ctx.lineWidth = 1.2;
+  ctx.beginPath();
+  ctx.moveTo(food.x, food.y);
+  ctx.lineTo(foodFloor.x, foodFloor.y);
+  ctx.stroke();
+
+  ctx.shadowBlur = 0;
+  ctx.setLineDash([]);
+  ctx.strokeStyle = 'rgba(94, 255, 156, 0.9)';
+  ctx.lineWidth = 1.6;
+  ctx.beginPath();
+  ctx.arc(food.x, food.y - 2, Math.max(5.5, beamWidth * 2.6), 0, Math.PI * 2);
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.arc(foodFloor.x, foodFloor.y, Math.max(4, beamWidth * 1.9), 0, Math.PI * 2);
+  ctx.stroke();
+
+  ctx.restore();
+}
+
 function drawBackground() {
   const gradient = ctx.createLinearGradient(0, 0, 0, canvas.clientHeight);
   gradient.addColorStop(0, '#dff4ff');
@@ -281,6 +349,10 @@ function draw() {
     .sort((a, b) => b.projected.depth - a.projected.depth);
 
   for (const item of drawableProjected) {
+    drawGroundShadow(item.pos, item.kind);
+  }
+
+  for (const item of drawableProjected) {
     const depthTone = item.pos.z / Math.max(1, WORLD_SIZE - 1);
     if (item.kind === 'food') {
       drawCell(item.projected, '#ff6b6b', '#972222');
@@ -293,6 +365,7 @@ function draw() {
     }
   }
 
+  drawTargetGuide(state.snake[0], state.food);
   drawReadyOverlay();
   drawGameOverOverlay();
   syncHud();

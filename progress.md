@@ -67,3 +67,11 @@ TODO for next agent:
   - Playwright ready capture: `output/web-game-cube-ready/state-0.json` (`"mode":"ready"`).
   - Visual check: cube silhouette is now stable with face shading and perspective-scaled block size.
   - Playwright run captures showed frequent early `game_over` under scripted input timing, but rendering/controls/hud worked and no console error logs were produced.
+- Added visual targeting aids:
+  - Added floor-projected shadows (size/alpha vary by altitude and type).
+  - Added green laser target guide from snake head to food.
+  - Added target rings at food point and projected floor point.
+- Validation (laser + shadow guide):
+  - Unit tests: `node --test snake-core.test.mjs` passed (8/8).
+  - Playwright captures confirm green target laser and floor-projected shadows are rendered.
+  - No `errors-*.json` detected.
