@@ -5,6 +5,7 @@ import {
   restartState,
   togglePause,
 } from './snake-core.mjs';
+import { directionFromKeyboardEvent, actionFromKeyboardEvent } from './keyboard-input.mjs';
 
 const WORLD_SIZE = 9;
 const CAMERA_YAW = -Math.PI / 4;
@@ -384,16 +385,6 @@ function frame(now) {
   requestAnimationFrame(frame);
 }
 
-function directionForKey(key) {
-  if (key === 'ArrowUp' || key === 'w' || key === 'W') return 'up';
-  if (key === 'ArrowDown' || key === 's' || key === 'S') return 'down';
-  if (key === 'ArrowLeft' || key === 'a' || key === 'A') return 'left';
-  if (key === 'ArrowRight' || key === 'd' || key === 'D') return 'right';
-  if (key === 'q' || key === 'Q' || key === 'PageUp') return 'in';
-  if (key === 'e' || key === 'E' || key === 'PageDown') return 'out';
-  return null;
-}
-
 function handleDirectionInput(dir) {
   setDirection(state, dir);
   if (!hasStarted && !state.gameOver) {
@@ -415,19 +406,20 @@ async function toggleFullscreenMode() {
 }
 
 document.addEventListener('keydown', (event) => {
-  const dir = directionForKey(event.key);
+  const dir = directionFromKeyboardEvent(event);
   if (dir) {
     event.preventDefault();
     handleDirectionInput(dir);
     return;
   }
 
-  if (event.key === 'p' || event.key === 'P') {
+  const action = actionFromKeyboardEvent(event);
+  if (action === 'toggle_pause') {
     if (hasStarted && !state.gameOver) togglePause(state);
-  } else if (event.key === 'r' || event.key === 'R') {
+  } else if (action === 'restart') {
     restartState(state);
     hasStarted = false;
-  } else if (event.key === 'f' || event.key === 'F') {
+  } else if (action === 'toggle_fullscreen') {
     toggleFullscreenMode();
   }
 });

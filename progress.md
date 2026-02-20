@@ -75,3 +75,7 @@ TODO for next agent:
   - Unit tests: `node --test snake-core.test.mjs` passed (8/8).
   - Playwright captures confirm green target laser and floor-projected shadows are rendered.
   - No `errors-*.json` detected.
+- Feature debug (Q/E/R key handling):
+  - Added keyboard event parser module using `event.code` first, then key fallback.
+  - Added tests for Q/E direction and R action mapping (including Korean layout key+code).
+  - Verified in browser with synthetic keydown events: KeyQ(ㅂ), KeyE(ㄷ), KeyR(ㄱ) now map correctly.
