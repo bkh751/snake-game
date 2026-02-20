@@ -32,15 +32,18 @@ const ACTION_BY_CODE = {
   KeyP: 'toggle_pause',
   KeyR: 'restart',
   KeyF: 'toggle_fullscreen',
+  KeyV: 'toggle_view',
 };
 
 const ACTION_BY_KEY = {
   p: 'toggle_pause',
   r: 'restart',
   f: 'toggle_fullscreen',
+  v: 'toggle_view',
   '\u3154': 'toggle_pause',
   '\u3131': 'restart',
   '\u3139': 'toggle_fullscreen',
+  '\u314d': 'toggle_view',
 };
 
 function normalizeKey(key) {

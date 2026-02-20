@@ -79,3 +79,15 @@ TODO for next agent:
   - Added keyboard event parser module using `event.code` first, then key fallback.
   - Added tests for Q/E direction and R action mapping (including Korean layout key+code).
   - Verified in browser with synthetic keydown events: KeyQ(ㅂ), KeyE(ㄷ), KeyR(ㄱ) now map correctly.
+- First-person view feature:
+  - Added `V` view toggle action (`3인칭` <-> `1인칭`) with keyboard/button support.
+  - Added first-person rendering pipeline (horizon/corridor/forward reticle/target marker).
+  - Added HUD view indicator and control guide update.
+- Keyboard mapping updates:
+  - Added `KeyV` action mapping with Korean layout fallback (`ㅍ`).
+- Validation:
+  - Unit tests: `node --test keyboard-input.test.mjs snake-core.test.mjs` passed (15/15).
+  - Browser verification (Playwright): `viewMode` transitions
+    - before: `third_person`
+    - after `V`: `first_person`
+    - after Korean `KeyV(ㅍ)`: `third_person`

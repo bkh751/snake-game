@@ -22,6 +22,16 @@ test('keyboard_action__code_keyr__maps_restart', () => {
   assert.equal(action, 'restart');
 });
 
+test('keyboard_action__code_keyv__maps_toggle_view', () => {
+  const action = actionFromKeyboardEvent({ key: 'v', code: 'KeyV' });
+  assert.equal(action, 'toggle_view');
+});
+
+test('keyboard_action__korean_layout_keyv__maps_toggle_view', () => {
+  const action = actionFromKeyboardEvent({ key: 'ㅍ', code: 'KeyV' });
+  assert.equal(action, 'toggle_view');
+});
+
 test('keyboard_action__unknown__returns_null', () => {
   const action = actionFromKeyboardEvent({ key: 'x', code: 'KeyX' });
   assert.equal(action, null);
