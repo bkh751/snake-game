@@ -6,6 +6,7 @@ import {
   togglePause,
 } from './snake-core.mjs';
 import { directionFromKeyboardEvent, actionFromKeyboardEvent } from './keyboard-input.mjs';
+import { normalizeViewMode, toggleViewMode as nextViewMode, labelForViewMode } from './view-mode.mjs';
 
 const WORLD_SIZE = 9;
 const CAMERA_YAW = -Math.PI / 4;
@@ -22,14 +23,15 @@ const foodDepthEl = document.getElementById('food-depth');
 const depthFillEl = document.getElementById('depth-fill');
 const restartBtn = document.getElementById('restart-btn');
 const pauseBtn = document.getElementById('pause-btn');
-const viewBtn = document.getElementById('view-btn');
+const viewThirdBtn = document.getElementById('view-third-btn');
+const viewFirstBtn = document.getElementById('view-first-btn');
 const touchButtons = document.querySelectorAll('.mobile-controls button[data-dir]');
 
 const state = createInitialState({ width: WORLD_SIZE, height: WORLD_SIZE, depth: WORLD_SIZE });
 
 let hasStarted = false;
 let lastTimestamp = performance.now();
-let viewMode = 'third_person';
+let viewMode = normalizeViewMode('third_person');
 
 function resizeCanvas() {
   const dpr = window.devicePixelRatio || 1;
@@ -496,8 +498,9 @@ function updateDepthHud() {
 function syncHud() {
   scoreEl.textContent = String(state.score);
   updateDepthHud();
-  viewModeEl.textContent = viewMode === 'third_person' ? '3인칭' : '1인칭';
-  viewBtn.textContent = viewMode === 'third_person' ? '1인칭 보기' : '3인칭 보기';
+  viewModeEl.textContent = labelForViewMode(viewMode);
+  viewThirdBtn.classList.toggle('view-active', viewMode === 'third_person');
+  viewFirstBtn.classList.toggle('view-active', viewMode === 'first_person');
 
   if (state.gameOver) {
     statusEl.textContent = '게임 오버';
@@ -580,8 +583,12 @@ function handleDirectionInput(dir) {
   }
 }
 
+function setViewMode(mode) {
+  viewMode = normalizeViewMode(mode, viewMode);
+}
+
 function toggleViewMode() {
-  viewMode = viewMode === 'third_person' ? 'first_person' : 'third_person';
+  viewMode = nextViewMode(viewMode);
 }
 
 async function toggleFullscreenMode() {
@@ -624,8 +631,11 @@ restartBtn.addEventListener('click', () => {
 pauseBtn.addEventListener('click', () => {
   if (hasStarted && !state.gameOver) togglePause(state);
 });
-viewBtn.addEventListener('click', () => {
-  toggleViewMode();
+viewThirdBtn.addEventListener('click', () => {
+  setViewMode('third_person');
+});
+viewFirstBtn.addEventListener('click', () => {
+  setViewMode('first_person');
 });
 
 for (const button of touchButtons) {

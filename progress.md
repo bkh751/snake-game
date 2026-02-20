@@ -91,3 +91,12 @@ TODO for next agent:
     - before: `third_person`
     - after `V`: `first_person`
     - after Korean `KeyV(ㅍ)`: `third_person`
+- View mode UX update (1인칭 + 3인칭):
+  - Replaced single toggle button with explicit `3인칭` and `1인칭` selection buttons.
+  - Added `view-mode.mjs` helper module for mode normalization/toggle/label.
+  - Retained `V` key toggle while enabling direct mode selection.
+  - Added active button styling for current view mode.
+- Validation:
+  - Added/ran `view-mode.test.mjs` (mode set/boundary/toggle/label).
+  - Full test suite pass: `view-mode + keyboard-input + snake-core` => 19/19.
+  - Playwright verification: third -> first (button), first -> third (button), third -> first (V key).

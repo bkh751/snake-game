@@ -91,6 +91,13 @@ button {
   cursor: pointer;
 }
 
+button.view-active {
+  background: #d7f4e5;
+  border-color: #4b9f72;
+  color: #194f35;
+  font-weight: 600;
+}
+
 .mobile-controls {
   display: none;
   margin-top: 12px;
