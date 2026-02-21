@@ -100,3 +100,19 @@ TODO for next agent:
   - Added/ran `view-mode.test.mjs` (mode set/boundary/toggle/label).
   - Full test suite pass: `view-mode + keyboard-input + snake-core` => 19/19.
   - Playwright verification: third -> first (button), first -> third (button), third -> first (V key).
+
+- Main+auxiliary dual-view update:
+  - Added opposite-view helper `oppositeViewMode()` and exposed `secondaryViewMode` in `render_game_to_text`.
+  - Refactored renderer to support viewport-based drawing and added inset viewport composition.
+  - Main view follows selected mode (`1인칭`/`3인칭`), and inset always renders the opposite mode.
+  - Added inset label (`보조: 1인칭` / `보조: 3인칭`) and updated guide text to describe this behavior.
+- Validation (dual-view inset):
+  - Syntax check: `node --check main.mjs` passed.
+  - Unit tests: `node --test view-mode.test.mjs keyboard-input.test.mjs snake-core.test.mjs` passed (20/20).
+  - Playwright client runs:
+    - `output/web-game-inset-third/` and `output/web-game-inset-first/` (running/game-over states).
+    - `output/web-game-inset-ready-third/` and `output/web-game-inset-ready-first/` (ready-state visual checks).
+  - `render_game_to_text` confirms inverse pairing:
+    - third_person => secondary first_person
+    - first_person => secondary third_person
+  - No `errors-*.json` generated in inset verification outputs.

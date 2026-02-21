@@ -10,6 +10,10 @@ export function toggleViewMode(current) {
   return current === 'first_person' ? 'third_person' : 'first_person';
 }
 
+export function oppositeViewMode(current) {
+  return toggleViewMode(normalizeViewMode(current));
+}
+
 export function labelForViewMode(mode) {
   return mode === 'first_person' ? '1인칭' : '3인칭';
 }

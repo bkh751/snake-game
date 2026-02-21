@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { normalizeViewMode, toggleViewMode, labelForViewMode } from './view-mode.mjs';
+import { normalizeViewMode, toggleViewMode, oppositeViewMode, labelForViewMode } from './view-mode.mjs';
 
 test('view_mode__set_first_person__kept', () => {
   assert.equal(normalizeViewMode('first_person', 'third_person'), 'first_person');
@@ -19,4 +19,10 @@ test('view_mode__toggle_roundtrip__returns_original', () => {
 test('view_mode__labels__korean', () => {
   assert.equal(labelForViewMode('third_person'), '3인칭');
   assert.equal(labelForViewMode('first_person'), '1인칭');
+});
+
+test('view_mode__opposite__returns_other_mode', () => {
+  assert.equal(oppositeViewMode('third_person'), 'first_person');
+  assert.equal(oppositeViewMode('first_person'), 'third_person');
+  assert.equal(oppositeViewMode('invalid'), 'first_person');
 });
